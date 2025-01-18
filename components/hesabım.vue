@@ -1,176 +1,169 @@
 <template>
-    <div class="account-section">
-      <!-- Hesabım Butonu -->
-      <div class="account-dropdown" @mouseover="showMenu" @mouseleave="hideMenu">
-        <button class="account-button">Hesabım</button>
-  
-        <!-- Dropdown Menü -->
-        <ul v-show="menuVisible" class="dropdown-menu">
+    <div class="dropdown" v-if="showDropdown" @mousedown.prevent>
+      <!-- Geçmiş Aramalar -->
+      <div class="section">
+        <h4>Geçmiş Aramalar</h4>
+        <ul class="list">
           <li
-            v-for="(item, index) in menuItems"
+            v-for="(item, index) in recentSearches"
             :key="index"
-            :class="{ active: activeIndex === index }"
-            @mouseover="hoverIndex = index"
-            @mouseleave="hoverIndex = null"
-            @click="navigate(item)"
+            class="list-item"
           >
-            {{ item.label }}
+            {{ item }}
           </li>
         </ul>
       </div>
-  
-      <!-- Kullanıcı Bilgilerim Formu -->
-      <div v-if="activeComponent === 'UserInfo'" class="user-info-form">
-        <h2>Kullanıcı Bilgilerim</h2>
-        <form>
-          <div class="form-section">
-            <h3>Üyelik Bilgilerim</h3>
-            <label>
-              Ad
-              <input type="text" placeholder="Adınız" />
-            </label>
-            <label>
-              Soyad
-              <input type="text" placeholder="Soyadınız" />
-            </label>
-            <label>
-              E-mail
-              <input type="email" placeholder="Email adresiniz" />
-            </label>
-            <label>
-              Cep Telefonu
-              <input type="tel" placeholder="Cep telefonunuz" />
-            </label>
-            <button type="button">Güncelle</button>
+
+      <!-- Popüler Aramalar -->
+      <div class="section">
+        <h4>Popüler Aramalar</h4>
+        <ul class="list">
+          <li
+            v-for="(item, index) in popularSearches"
+            :key="index"
+            class="list-item"
+          >
+            {{ item }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- Popüler Ürünler -->
+      <div class="section popular-products">
+        <h4>Popüler Ürünler</h4>
+        <div class="slider">
+          <button @click="prevSlide" class="arrow left-arrow">❮</button>
+          <div class="products">
+            <div
+              v-for="(product, index) in visibleProducts"
+              :key="index"
+              class="product"
+            >
+              <img :src="product.image" :alt="product.name" />
+              <div class="product-info">
+                <p>{{ product.name }}</p>
+                <p>{{ product.price }}</p>
+              </div>
+            </div>
           </div>
-  
-          <div class="form-section">
-            <h3>Şifre Güncelleme</h3>
-            <label>
-              Şu Anki Şifre
-              <input type="password" placeholder="Mevcut şifreniz" />
-            </label>
-            <label>
-              Yeni Şifre
-              <input type="password" placeholder="Yeni şifreniz" />
-            </label>
-            <label>
-              Yeni Şifre (Tekrar)
-              <input type="password" placeholder="Yeni şifre tekrar" />
-            </label>
-            <button type="button">Güncelle</button>
-          </div>
-        </form>
+          <button @click="nextSlide" class="arrow right-arrow">❯</button>
+        </div>
       </div>
     </div>
   </template>
   
   <script>
   export default {
-    name: "Hesabim",
-    data() {
-      return {
-        menuVisible: false,
-        menuItems: [
-        { label: "Kullanıcı Bilgilerim", component: "UserInfo" },
-          { label: "Tüm Siparişlerim", component: null },
-          { label: "Değerlendirmelerim", component: null },
-          { label: "Satıcı Mesajlarım", component: null },
-          { label: "İndirim Kuponlarım", component: null },
-         
-        ],
-        activeComponent: null,
-        hoverIndex: null,
-      };
+  name: "Arama",
+  data() {
+    return {
+      searchQuery: "",
+      showDropdown: false,
+      recentSearches: ["Lenovo", "iPhone"],
+      popularSearches: ["Skechers", "Robot Süpürge", "Bileklik", "Baharatlık"],
+      products: [
+        { name: "Ürün 1", image: "/saat.png", price: "100 TL" },
+        { name: "Ürün 2", image: "/telefon.png", price: "200 TL" },
+        { name: "Ürün 3", image: "/televizyon.png", price: "300 TL" },
+        { name: "Ürün 4", image: "/ütü.png", price: "400 TL" },
+      ],
+      currentIndex: 0,
+    };
+  },
+  computed: {
+    visibleProducts() {
+      return this.products.slice(this.currentIndex, this.currentIndex + 2);
     },
-    computed: {
-      activeIndex() {
-        return this.menuItems.findIndex((item) => item.component === this.activeComponent);
-      },
+  },
+  methods: {
+    hideDropdown() {
+      setTimeout(() => {
+        this.showDropdown = false;
+      }, 200);
     },
-    methods: {
-      showMenu() {
-        this.menuVisible = true;
-      },
-      hideMenu() {
-        this.menuVisible = false;
-      },
-      navigate(item) {
-        if (item.component) {
-          this.activeComponent = item.component;
-        }
-      },
+    nextSlide() {
+      this.currentIndex =
+        (this.currentIndex + 1) % (this.products.length - 1 || 1);
     },
-  };
+    prevSlide() {
+      this.currentIndex =
+        (this.currentIndex - 1 + this.products.length) %
+        (this.products.length - 1 || 1);
+    },
+  },
+};
   </script>
   
   <style scoped>
-  .account-section {
-    position: relative;
-    width: 600px;
-  }
-  .account-button {
-    background-color: #ff5900;
-    padding: 10px;
-    border: 1px solid #ccc;
-    cursor: pointer;
-    width: 50%;
-  }
-  .dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background: white;
-    border: 1px solid #ccc;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-    width: 50%;
-  }
-  .dropdown-menu li {
-    padding: 10px;
-    cursor: pointer;
-    transition: color 0.3s ease;
-  }
-  .dropdown-menu li:hover {
-    color: #007bff;
-  }
-  .dropdown-menu li.active {
-    font-weight: bold;
-  }
-  .user-info-form {
-    margin-top: 50px;
-    border: 1px solid #f1ecec;
-    padding: 20px;
-    background: #f3f1f1;
-  }
-  .form-section {
-    margin-bottom: 20px;
-  }
-  .form-section h3 {
-    margin-bottom: 10px;
-  }
-  label {
-    display: block;
-    margin-bottom: 10px;
-  }
-  input {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    border: 1px solid #f9f4f4;
-    border-radius: 4px;
-  }
-  button {
-    background-color: #ff6600;
-    color: white;
-    padding: 10px;
-    border: none;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-  button:hover {
-    background-color: #e55d00;
-  }
+  .dropdown {
+  position: fixed;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  z-index: 1000;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.section h4 {
+  margin-bottom: 10px;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+}
+
+.list-item {
+  padding: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.list-item:hover {
+  background-color: #f0f0f0;
+}
+
+/* Popüler Ürünler */
+.popular-products .slider {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.slider .products {
+  display: flex;
+  overflow: hidden;
+  width: 300px;
+}
+
+.slider .product {
+  flex: 0 0 150px;
+  margin-right: 10px;
+}
+
+.slider img {
+  width: 100%;
+  border-radius: 5px;
+}
+
+.arrow {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #007bff;
+}
+
+.arrow:hover {
+  color: #0056b3;
+}
   </style>
   

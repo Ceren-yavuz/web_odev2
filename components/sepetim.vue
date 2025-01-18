@@ -1,281 +1,297 @@
 <template>
-    <div class="cart-container">
-      <!-- Ürün Kartı -->
-      <div class="product-card">
-        <div class="product-info">
-          <div class="seller-info">
-            <span class="seller-name">Satıcı: TechStore</span>
-            <span class="seller-rating">⭐⭐⭐⭐☆</span>
-          </div>
-          <div class="product-details">
-            <div class="product-checkbox">
-              <input type="checkbox" v-model="isSelected" />
-            </div>
-            <div class="product-image-container">
-              <img
-                :src="productImage"
-                alt="Bilgisayar"
-                class="product-image"
-                @mouseover="onHover"
-                @mouseleave="onLeave"
-              />
-            </div>
-            <div class="product-description">
-              <h2>Bilgisayar</h2>
-              <p>Güçlü işlemci ve yüksek performans</p>
-              <div class="prices">
-                <!-- Eski fiyat üstü çizili ve yeni fiyat yan yana -->
-                <span class="old-price">{{ oldPrice }}₺</span>
-                <span class="new-price">{{ newPrice }}₺</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-  
-      <!-- Sipariş Özeti -->
-      <div class="order-summary">
-        <div class="summary-item">
-          <span>Sepet Toplamı </span>
-          <span class="summary-value">{{ total }}₺</span>
-        </div>
-        
-        <div class="summary-item">
-          <span>Kargo Ücreti </span>
-          <span class="summary-value">{{ shippingCost }}₺</span>
-        </div>
-      </div>
-  
-      <!-- Sepet Toplamı -->
-      <div class="cart-total">
-        <div>
-          <span class="total-text">Toplam  </span>
-          <span class="currency">{{ total + shippingCost }}₺</span>
-        </div>
-      </div>
-  
-      <!-- Sepeti Onayla Butonu -->
-      <button class="checkout-btn" :disabled="!isSelected">Sepeti Onayla</button>
-    </div>
-  </template>
-  
-  <script setup lang="ts">
-  import { ref, computed } from "vue";
-  
-  // Resim URL'leri
-  const resim1 = "/resim1.png";  // Ana resim
-  const resim2 = "/resim2.png";  // Hover resim
-  
-  // Resmin şu anki durumu
-  const productImage = ref(resim1);
-  
-  // Hover efektleri
-  const onHover = () => {
-    productImage.value = resim2; // Hover olduğunda resim değişir
-  };
-  
-  const onLeave = () => {
-    productImage.value = resim1; // Hover'dan çıktığında orijinal resme döner
-  };
-  
-  // Sepet öğesi seçimi
-  const isSelected = ref(false); // Checkbox'ın seçili olup olmadığını kontrol eder
-  
-  // Ürün fiyatı ve indirimli fiyat
-  const oldPrice = 10000; // Eski fiyat
-  const discount = 200; // İndirim miktarı
-  const newPrice = oldPrice - discount; // Yeni fiyat (indirimli fiyat)
-  
-  // Kargo ücreti ve kargo bedava durumu
-  const shippingCost = computed(() => {
-    return newPrice > 200 ? 0 : 50;  // Eğer ürün 200 TL'den fazla ise kargo bedava, aksi takdirde 50 TL
-  });
-  
-  // Sepet toplamı, checkbox işaretli ise yeni fiyat, değilse 0
-  const total = computed(() => {
-    return isSelected.value ? newPrice : 0; // Checkbox işaretli ise yeni fiyat, değilse 0
-  });
-  </script>
-  
-  <style scoped>
-  /* Genel stil */
-  .cart-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 40px;
-    width: 90%;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  
-  .product-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    background-color: #fff;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-  }
-  
-  .product-card:hover {
-    transform: scale(1.02);
-  }
-  
-  .product-info {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .seller-info {
-    font-size: 14px;
-    color: #777;
-    margin-bottom: 10px;
-  }
-  
-  .seller-name {
-    font-weight: bold;
-  }
-  
-  .seller-rating {
-    color: #ffcc00;
-  }
-  
-  .product-details {
-    display: flex;
-    align-items: center;
-  }
-  
+  <div class="cart-container">
+    <!-- Sol Kısım: Sepet ve İndirim -->
+    <div class="cart-left">
+      <h1>Sepetim ({{ cartItems.length }} Ürün)</h1>
 
-  .product-checkbox input[type="checkbox"] {
-  width: 25px;  /* Genişlik */
-  height: 25px; /* Yükseklik */
-  margin-right: 20px;
+      <!-- İndirim Kuponları -->
+      <div class="discount-section">
+        <h3>İndirim Kuponlarım</h3>
+        <div class="coupon-card">
+          <div class="coupon-left">
+            <div class="coupon">
+              <div class="coupon-info">
+                <span class="highlight">Son 1 Gün!</span>
+                <p>Favorilediğin Ürüne Özel! ❤️</p>
+                <small>Alt Limit: 2.750 TL</small>
+              </div>
+              <button class="apply-button">Ürün Ekle & Uygula</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sepet Ürünleri -->
+      <div class="cart-products">
+        <div class="product-header">
+          <span>Satıcı: Taraftarium</span>
+          <span class="badge">8.6</span>
+          <span class="free-shipping">Kargo Bedava!</span>
+        </div>
+        <div v-for="(item, index) in cartItems" :key="item.id" class="product-item">
+          <div class="product-info">
+            <img
+                :src="item.image"
+                :alt="item.name"
+                class="product-image"
+            />
+            <div>
+              <h4>{{ item.name }}</h4>
+              <p>Beden: {{ item.size }}</p>
+              <p class="delivery-time">
+                ⏰ 7 saat 21 dakika içinde sipariş verirsen, <strong>yarın kargoda!</strong>
+              </p>
+            </div>
+          </div>
+          <div class="product-actions">
+            <div class="quantity">
+              <button @click="decreaseQuantity(index)" :disabled="item.quantity === 1">-</button>
+              <span>{{ item.quantity }}</span>
+              <button @click="increaseQuantity(index)">+</button>
+            </div>
+            <span class="price">{{ item.price * item.quantity }} TL</span>
+            <button class="delete" @click="removeItem(index)">Sil</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sağ Kısım: Sipariş Özeti -->
+    <div class="order-summary">
+      <h3>Sipariş Özeti</h3>
+      <div class="summary-item">
+        <span>Ürünün Toplamı</span>
+        <span>{{ cartTotal }} TL</span>
+      </div>
+      <div class="summary-item">
+        <span>Kargo Toplam</span>
+        <span>39,99 TL</span>
+      </div>
+      <div class="summary-item">
+        <span>200 TL ve Üzeri Kargo Bedava</span>
+        <span class="discount">-39,99 TL</span>
+      </div>
+      <div class="summary-total">
+        <span>Toplam</span>
+        <span>{{ cartTotal }} TL</span>
+      </div>
+      <button class="checkout-button">Sepeti Onayla</button>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { reactive, computed } from "vue";
+
+// Reactive state for cart items
+const cartItems = reactive([
+  {
+    id: 1,
+    name: "Fenerbahçe 2023/2024 Yeni Sezon Çubuklu Maç Forması",
+    size: "L",
+    image: "/fener.jpg",
+    price: 1949,
+    quantity: 1,
+  },
+  // İleride ek ürünler buraya eklenebilir.
+]);
+
+// Computed property for cart total
+const cartTotal = computed(() =>
+    cartItems.reduce((total, item) => total + item.price * item.quantity, 0)
+);
+
+// Method to increase item quantity
+const increaseQuantity = (index: number) => {
+  cartItems[index].quantity += 1;
+};
+
+// Method to decrease item quantity
+const decreaseQuantity = (index: number) => {
+  if (cartItems[index].quantity > 1) {
+    cartItems[index].quantity -= 1;
+  }
+};
+
+// Method to remove item from cart
+const removeItem = (index: number) => {
+  cartItems.splice(index, 1);
+};
+</script>
+
+<style scoped>
+/* Tüm CSS'ler buraya eklendi */
+.cart-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 20px;
+  font-family: Arial, sans-serif;
 }
-  
-  .product-image-container {
-    width: 350px;
-    height: 250px;
-    margin-right: 20px;
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  
-  .product-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-    border-radius: 8px;
-  }
-  
-  .product-description h2 {
-    font-size: 30px;
-    font-weight: bold;
-    color: #333;
-    margin: 0;
-  }
-  
-  .product-description p {
-    font-size: 17px;
-    color: #777;
-  }
-  
-  .prices {
-    margin-top: 15px;
-    display: flex;
-    align-items: center;
-  }
-  
-  .old-price {
-    font-size: 25px;
-    color: #da0c0c;
-    text-decoration: line-through; /* Eski fiyat üstü çizili */
-    margin-right: 10px;
-  }
-  
-  .new-price {
-    font-size: 30px;
-    font-weight: bold;
-    color: #0d0d0d;
-  }
-  
-  /* Sipariş Özeti */
-  .order-summary {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 800px;
-    padding: 20px;
-    background-color: #a9a7a7;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    margin-top: 30px;
-  }
-  
-  .summary-item {
-    font-size: 20px;
-    margin-bottom: 20px;
-  }
-  
-  .summary-item span {
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .seller-rating {
-    color: #ffcc00;
-  }
-  
-  /* Sepet Toplamı */
-  .cart-total {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    max-width: 600px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    margin-top: 20px;
-  }
-  
-  .total-text {
-    font-size: 22px;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .currency {
-    font-size: 24px;
-    font-weight: bold;
-    color: #f98c07;
-  }
-  
-  /* Sepeti Onayla Butonu */
-  .checkout-btn {
-    width: 100%;
-    max-width: 600px;
-    padding: 16px;
-    font-size: 20px;
-    font-weight: bold;
-    color: #fff;
-    background-color: #fc7601;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-top: 30px;
-  }
-  
-  .checkout-btn:hover {
-    background-color: #f4c347;
-  }
-  </style>
-  
+
+.cart-left {
+  flex: 3;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+.discount-section {
+  background: #fef5e6;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.coupon-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px dashed #ffa726;
+  border-radius: 8px;
+  padding: 15px;
+  gap: 15px;
+}
+
+.coupon-left {
+  text-align: center;
+  background: #fffbf4;
+  padding: 30px 60px;
+  border-radius: 8px;
+  border: 1px solid #ffa726;
+}
+
+.apply-button {
+  margin-top: 10px;
+  padding: 8px 15px;
+  border: 1px solid #ffa726;
+  background: transparent;
+  color: #ffa726;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.apply-button:hover {
+  background: #ffa726;
+  color: #fff;
+}
+
+.cart-products {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.badge {
+  background: #4caf50;
+  color: white;
+  padding: 3px 5px;
+  border-radius: 3px;
+}
+
+.free-shipping {
+  color: #007bff;
+}
+
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid #ddd;
+}
+
+.product-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.product-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.delivery-time {
+  color: #28a745;
+  font-size: 12px;
+}
+
+.product-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.quantity {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.quantity button {
+  background: #ddd;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.price {
+  font-weight: bold;
+}
+
+.delete {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.order-summary {
+  flex: 1;
+  background: #fff;
+  padding: 15px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.checkout-button {
+  width: 100%;
+  background: #f90;
+  color: white;
+  border: none;
+  padding: 10px 0;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+</style>

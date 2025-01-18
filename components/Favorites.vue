@@ -1,225 +1,298 @@
 <template>
-  <div class="favorites-page">
-    <h1 class="page-title">
-      <span class="heart-symbol">❤️</span> Favorilerim
-    </h1>
-    <div class="products-container">
-      <div class="product-card" v-for="(product, index) in products" :key="index">
-        <!-- Ürün Görselleri ve Etiketler -->
-        <div class="product-image-container">
-          <!-- Kargo ve Teslimat Etiketleri -->
-          <div class="badge-container">
-            <div class="badge delivery-badge" v-if="product.fastDelivery">HIZLI TESLİMAT</div>
-            <div class="badge shipping-badge" v-if="product.freeShipping">KARGO BEDAVA</div>
-          </div>
+  
+  <div>
+    
+    <!-- Buttons Section -->
+    <div class="buttons">
+      <button
+          v-for="(button, index) in buttons"
+          :key="button.label"
+          :class="['button', button.color, { active: button.active }]"
+          @click="toggleButton(button)"
+      >
+        <FontAwesomeIcon :icon="button.icon" class="icon" />
+        {{ button.label }}
+      </button>
+      <button class="remove-button" @click="removeFromCart(product)">
+        <FontAwesomeIcon icon="fa-xmark" />
+      </button>
 
-          <!-- Ürün Resimleri -->
-          <img
-            :src="product.image"
-            alt="product image"
-            class="product-image default-image"
-          />
-          <img
-            :src="product.hoverImage"
-            alt="product hover image"
-            class="product-image hover-image"
-          />
-        </div>
+    </div>
 
-        <!-- Ürün Bilgileri -->
-        <div class="product-info">
-          <h3 class="product-name">{{ product.name }}</h3>
-          <p class="product-price">{{ product.price }}</p>
+    <!-- Cards Section -->
+    <div class="cards">
+      <div class="card" v-for="product in products" :key="product.id">
 
-          <p v-if="product.outOfStock" class="out-of-stock">Tükendi</p>
-
-          <div v-if="!product.outOfStock" class="size-selector">
-            <label for="size">Beden:</label>
-            <select v-model="product.selectedSize" id="size">
-              <option v-for="size in product.sizes" :key="size" :value="size">{{ size }}</option>
+        <!-- Remove Button -->
+        <button class="remove-button" @click="removeFromCart(product)">
+          <FontAwesomeIcon icon="fa-xmark" />
+        </button>
+        <!-- Product Image -->
+        <img :src="product.image" alt="Product Image" />
+        <!-- Product Details -->
+        <div class="details">
+          <h3>{{ product.title }}</h3>
+          <p class="description">{{ product.description }}</p>
+          <p class="stock-info" v-if="product.stock">{{ product.stockInfo }}</p>
+          <p class="price">{{ product.price }} TL</p>
+          <div class="size-and-cart">
+            <!-- Size Dropdown -->
+            <select class="size-dropdown" v-model="product.selectedSize">
+              <option v-for="size in product.sizes" :key="size" :value="size">
+                {{ size }}
+              </option>
             </select>
-          </div>
 
-          <button class="remove-button" @click="removeProduct(index)">Kaldır</button>
-          <button class="similar-products-button" @click="showSimilarProducts(product)">Benzer Ürünler</button>
+            <!-- Add to Cart Button -->
+            <button class="add-to-cart" @click="addToCart(product)">
+              <FontAwesomeIcon icon="fa-cart-plus" />
+              Sepete Ekle
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref } from "vue";
+<script lang="ts" setup>
+import { ref } from 'vue';
 
-const products = ref([
+// Tip tanımlamaları
+interface Button {
+  label: string;
+  color: string;
+  icon: string;
+  active: boolean;
+}
+
+interface Product {
+  id: number;
+  image: string;
+  title: string;
+  description: string;
+  price: number;
+  sizes: string[];
+  selectedSize: string;
+  stock: boolean;
+  stockInfo: string;
+}
+
+// `ref`'ler için type tanımlamaları
+const buttons = ref<Button[]>([
+  { label: 'Tümü', color: 'orange', icon: 'fa-heart', active: true },
+  { label: 'Kuponlu Ürünler', color: 'pink', icon: 'fa-ticket-alt', active: false },
+  { label: 'Fiyatı Düşenler', color: 'red', icon: 'fa-chart-line', active: false },
+  { label: 'Avantajlı Ürünler', color: 'blue', icon: 'fa-star', active: false },
+]);
+
+const products = ref<Product[]>([
   {
-    name: "Bot",
-    price: "899,99₺",
-    image: "/bot.png",
-    hoverImage: "/bot2.png",
-    sizes: ["S", "M", "L", "XL"],
-    selectedSize: "M",
-    outOfStock: false,
-    freeShipping: true,
-    fastDelivery: true,
-    rating: 4,
-    ratingCount: 123,
+    id: 1,
+    image: '/fener.jpg',
+    title: 'Fenerbahçe 2023/24 A Takım Forma',
+    description: 'Fenerbahçe forma.',
+    price: 1450,
+    sizes: ['S', 'M', 'L', 'XL'],
+    selectedSize: 'M',
+    stock: false,
+    stockInfo: '134 kişinin sepetinde, kaçırma!',
   },
   {
-    name: "Kazak",
-    price: "259,99₺",
-    image: "/kazak.png",
-    hoverImage: "/kazak2.png",
-    sizes: ["S", "M", "L", "XL"],
-    selectedSize: "L",
-    outOfStock: true,
-    freeShipping: true,
-    fastDelivery: true,
-    rating: 3,
-    ratingCount: 89,
+    id: 2,
+    image: '/fener2.jpg',
+    title: 'Fenerbahçe Erkek 2023/24 Deplasman Forması',
+    description: 'Yüksek kaliteli forma.',
+    price: 1379.95,
+    sizes: ['S', 'M', 'L', 'XL'],
+    selectedSize: 'L',
+    stock: false,
+    stockInfo: '50 TL Kupon',
   },
   {
-    name: "Pantolon",
-    price: "349,99₺",
-    image: "/pantolon.png",
-    hoverImage: "/pantolon2.png",
-    sizes: ["M", "L", "XL"],
-    selectedSize: "M",
-    outOfStock: false,
-    freeShipping: true,
-    fastDelivery: true,
-    rating: 5,
-    ratingCount: 230,
+    id: 3,
+    image: '/images/urun3.jpg',
+    title: 'Fenerbahçe 2022/23 A Takım Tek Alt',
+    description: 'Takım tek alt pantolonu.',
+    price: 1299.90,
+    sizes: ['XS', 'S', 'M', 'L'],
+    selectedSize: 'M',
+    stock: true,
+    stockInfo: 'Hızlı teslimat yapılıyor!',
   },
 ]);
 
-const removeProduct = (index) => {
-  products.value.splice(index, 1);
+// Fonksiyonların tip tanımlamaları
+const toggleButton = (button: Button): void => {
+  buttons.value.forEach((btn) => (btn.active = false));
+  button.active = true;
 };
 
-const showSimilarProducts = (product) => {
-  alert(`Benzer ürünler: ${product.name}`);
+const addToCart = (product: Product): void => {
+  alert(`${product.title} sepete eklendi!`);
 };
+
+const removeFromCart = (product: Product): void => {
+  alert(`${product.title} sepetten kaldırıldı!`);
+};
+
 </script>
 
 <style scoped>
-/* Sayfa genel stili */
-.favorites-page {
-  padding: 20px;
-  background-color: #f5f5f5;
+/* Button Styles */
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 
-.page-title {
-  font-size: 2rem;
+.button {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  transition: background-color 0.3s;
   font-weight: bold;
-  color: #333;
+  gap: 10px;
+  border-radius: 20px;
+}
+
+.button.orange {
+  background: #f39c12;
+}
+
+.button.pink {
+  background: #e91e63;
+}
+
+.button.red {
+  background: #e74c3c;
+}
+
+.button.blue {
+  background: #3498db;
+}
+
+.button.active.orange {
+  background: #d35400;
+}
+
+.button.active.pink {
+  background: #c2185b;
+}
+
+.button.active.red {
+  background: #c0392b;
+}
+
+.button.active.blue {
+  background: #2980b9;
+}
+
+.icon {
+  font-size: 16px;
+}
+/* Cards Section */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
   text-align: center;
-  margin-bottom: 20px;
+  background: #fff;
+  position: relative;
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+}
+
+.details {
+  padding: 15px;
+}
+
+.details .price {
+  font-weight: bold;
+  margin: 10px 0;
+}
+.remove-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #e74c3c; /* Daha dikkat çekici bir kırmızı */
+  cursor: pointer;
+  font-size: 24px; /* X ikonunu biraz daha büyük yap */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.heart-symbol {
-  font-size: 1.5rem;
-  color: #ff6a13;
-  margin-right: 10px;
+.remove-button:hover {
+  color: #c0392b; /* Hover'da daha koyu bir kırmızı */
 }
 
-/* Ürün kartları stili */
-.products-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-  padding: 20px;
-}
 
-.product-card {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  padding: 10px;
-  position: relative;
-}
-
-.product-image-container {
-  position: relative;
-  width: 100%;
-  height: 300px;
-  overflow: hidden;
-}
-
-.product-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: opacity 0.3s ease;
-}
-
-.default-image {
-  opacity: 1;
-}
-
-.hover-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0;
-}
-
-.product-image-container:hover .default-image {
-  opacity: 0;
-}
-
-.product-image-container:hover .hover-image {
-  opacity: 1;
-}
-
-/* Etiketler (Badge) */
-.badge-container {
-  position: absolute;
-  top: 10px;
-  left: 10px;
+/* Size Dropdown */
+.size-and-cart {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 10px; /* Butonlar arasında boşluk */
+  margin-top: 10px; /* Üstteki elementten boşluk */
+}
+
+.size-dropdown {
+  padding: 5px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+/* Add to Cart Button */
+.add-to-cart {
+  display: flex;
+  align-items: center;
   gap: 5px;
-  z-index: 10; /* Resimlerin üstünde görünmesini sağlar */
-}
-
-.badge {
-  font-size: 0.8rem;
-  font-weight: bold;
+  padding: 10px 15px;
+  background: #0057b8;
   color: #fff;
-  padding: 5px 10px;
-  border-radius: 4px;
-  display: inline-block;
-  text-align: center;
-}
-
-.delivery-badge {
-  background-color: #28a745; /* Yeşil */
-}
-
-.shipping-badge {
-  background-color: #6c757d; /* Gri */
-}
-
-/* Diğer CSS'ler */
-.product-info {
-  margin-top: 10px;
-}
-
-.product-name {
-  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
   font-weight: bold;
-  color: #333;
+  border-radius: 5px;
 }
 
-.product-price {
-  font-size: 0.9rem;
-  color: #666;
+.add-to-cart {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 15px;
+  background: #0057b8;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+.add-to-cart:hover {
+  background: #004494;
+}
+
+.out-of-stock {
+  color: #e74c3c;
+  font-weight: bold;
 }
 </style>

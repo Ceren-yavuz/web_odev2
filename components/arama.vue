@@ -1,221 +1,129 @@
 <template>
-  <div class="search-container">
-    <!-- Arama Çubuğu -->
-    <div class="search-bar">
-      <input
-        type="text"
-        placeholder="Aradığınız ürün, kategori veya markayı yazınız"
-        v-model="searchQuery"
-        @focus="showDropdown = true"
-        @blur="hideDropdown"
-      />
-      <button class="search-button">🔍</button>
+  <div class="arama-componenti">
+    <div class="categories">
+      <button
+          v-for="category in categories"
+          :key="category.id"
+          class="category-button"
+          @click="handleClick(category.id)"
+      >
+        <img :src="category.image" :alt="category.name" />
+        <p>{{ category.name }}</p>
+      </button>
     </div>
 
-    <!-- Açılır Menü -->
-    <div class="dropdown" v-if="showDropdown" @mousedown.prevent>
-      <!-- Geçmiş Aramalar -->
-      <div class="section">
-        <h4>Geçmiş Aramalar</h4>
-        <ul class="list">
-          <li
-            v-for="(item, index) in recentSearches"
-            :key="index"
-            class="list-item"
-          >
-            {{ item }}
-          </li>
-        </ul>
-      </div>
-
-      <!-- Popüler Aramalar -->
-      <div class="section">
-        <h4>Popüler Aramalar</h4>
-        <ul class="list">
-          <li
-            v-for="(item, index) in popularSearches"
-            :key="index"
-            class="list-item"
-          >
-            {{ item }}
-          </li>
-        </ul>
-      </div>
-
-      <!-- Popüler Ürünler -->
-      <div class="section popular-products">
-        <h4>Popüler Ürünler</h4>
-        <div class="slider">
-          <button @click="prevSlide" class="arrow left-arrow">❮</button>
-          <div class="products">
-            <div
-              v-for="(product, index) in visibleProducts"
-              :key="index"
-              class="product"
-            >
-              <img :src="product.image" :alt="product.name" />
-              <div class="product-info">
-                <p>{{ product.name }}</p>
-                <p>{{ product.price }}</p>
-              </div>
-            </div>
-          </div>
-          <button @click="nextSlide" class="arrow right-arrow">❯</button>
-        </div>
-      </div>
-    </div>
   </div>
+  <div class="buttons">
+    <button class="button green">Sepete en çok eklenenler</button>
+    <button class="button orange">En çok öne çıkanlar</button>
+    <button class="button red">Flaş Ürünler</button>
+  </div>
+
 </template>
 
-<script>
-export default {
-  name: "Arama",
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+export default defineComponent({
+  name: 'AramaComponenti',
   data() {
     return {
-      searchQuery: "",
-      showDropdown: false,
-      recentSearches: ["Lenovo", "iPhone"],
-      popularSearches: ["Skechers", "Robot Süpürge", "Bileklik", "Baharatlık"],
-      products: [
-        { name: "Ürün 1", image: "/saat.png", price: "100 TL" },
-        { name: "Ürün 2", image: "/telefon.png", price: "200 TL" },
-        { name: "Ürün 3", image: "/televizyon.png", price: "300 TL" },
-        { name: "Ürün 4", image: "/ütü.png", price: "400 TL" },
+      categories: [
+        { id: 1, name: 'İyi Fiyatlı Ürünler', image: '/icon1.jpg' },
+        { id: 2, name: 'Sen De Al!', image: '/icon2.jpg' },
+        { id: 3, name: 'Avantajlı Ürünler', image: '/icon3.jpg' },
+        { id: 4, name: 'İndirim Kuponlarım', image: '/icon4.jpg' },
+        { id: 5, name: 'Krediler', image: '/icon5.jpg' },
+        { id: 6, name: 'Kredi Kartı', image: '/icon6.jpg' },
+        { id: 7, name: 'Yeni Gelen Ürünler', image: '/icon7.jpg' },
       ],
-      currentIndex: 0,
     };
   },
-  computed: {
-    visibleProducts() {
-      return this.products.slice(this.currentIndex, this.currentIndex + 2);
-    },
-  },
   methods: {
-    hideDropdown() {
-      setTimeout(() => {
-        this.showDropdown = false;
-      }, 200);
-    },
-    nextSlide() {
-      this.currentIndex =
-        (this.currentIndex + 1) % (this.products.length - 1 || 1);
-    },
-    prevSlide() {
-      this.currentIndex =
-        (this.currentIndex - 1 + this.products.length) %
-        (this.products.length - 1 || 1);
+    handleClick(categoryId: number) {
+      console.log(`Category clicked: ${categoryId}`);
+      // İlgili işlem burada yapılabilir
     },
   },
-};
+});
 </script>
 
 <style scoped>
-/* Arama Çubuğu */
-.search-container {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  position: relative;
-}
-
-.search-bar {
+.arama-componenti {
   display: flex;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  overflow: hidden;
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  z-index: 10;
-  background: white;
-}
-
-.search-bar input {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  outline: none;
-}
-
-.search-bar button {
-  background-color: #f37400;
-  color: white;
-  border: none;
-  padding: 10px;
-  cursor: pointer;
-}
-
-/* Dropdown */
-.dropdown {
-  position: fixed;
-  top: 50px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 90%;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  padding: 10px;
-  z-index: 1000;
-}
-
-.section {
-  margin-bottom: 20px;
-}
-
-.section h4 {
-  margin-bottom: 10px;
-}
-
-.list {
-  list-style: none;
-  padding: 0;
-}
-
-.list-item {
-  padding: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.list-item:hover {
-  background-color: #f0f0f0;
-}
-
-/* Popüler Ürünler */
-.popular-products .slider {
-  display: flex;
+  justify-content: center;
   align-items: center;
-  position: relative;
 }
 
-.slider .products {
+.categories {
   display: flex;
-  overflow: hidden;
-  width: 300px;
+  flex-wrap: wrap;
+  gap: 118px;
+  margin-bottom: 50px;
 }
 
-.slider .product {
-  flex: 0 0 150px;
-  margin-right: 10px;
-}
-
-.slider img {
-  width: 100%;
-  border-radius: 5px;
-}
-
-.arrow {
-  background: none;
-  border: none;
-  font-size: 24px;
+.category-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background-color: #f9f9f9;
+  border: 2px solid #ddd;
+  border-radius: 20px;
+  padding: 20px;
+  width: 120px;
+  text-align: center;
   cursor: pointer;
-  color: #007bff;
+  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
 }
 
-.arrow:hover {
-  color: #0056b3;
+.category-button:hover {
+  background-color: #ffe4e1;
+  border-color: #ff7f7f;
+  transform: scale(1.05);
+}
+
+.category-button img {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}
+
+.category-button p {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 1600px;
+}
+
+.button {
+  padding: 25px 30px;
+  border: none;
+  border-radius: 15px;
+  font-size: 30px; /* yazı boyutu */
+  cursor: pointer;
+  color: white;
+}
+
+.button.green {
+  background-color: #d4f5d4;
+  color: #2c6f2c;
+}
+
+.button.orange {
+  background-color: #ffedcc;
+  color: #b36b00;
+}
+
+.button.red {
+  background-color: #ffccd5;
+  color: #a10029;
+  margin-left: 50px;
 }
 </style>
