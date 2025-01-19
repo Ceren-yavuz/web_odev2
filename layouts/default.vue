@@ -90,9 +90,11 @@
   </div>
 
   <nav class="categories">
-    <button class="category-all">
-      <span class="icon">☰</span>
-      <span class="category-text">Tüm Kategoriler</span>
+    <!-- Tüm Kategoriler Butonu -->
+   
+    <button @click="toggleCategoriesMenu" class="category-button" >
+      
+      <span class="category-text">☰ Tüm Kategoriler </span>
     </button>
     <a href="#" class="category-link">Kadın</a>
     <a href="#" class="category-link">Erkek</a>
@@ -104,6 +106,40 @@
     <a href="#" class="category-link">Elektronik</a>
     <a href="#" class="category-link">Çok Satanlar</a>
     <a href="#" class="category-link">Fırsat Ürünleri</a>
+
+    <!-- Ana Kategoriler Menü -->
+    <div v-if="showCategoriesMenu" class="main-menu">
+      <ul class="main-category-list">
+        <li
+          v-for="category in allCategories"
+          :key="category.id"
+          class="main-category-item"
+          @mouseover="onCategoryHover(category)"
+          @mouseleave="onCategoryLeave"
+        >
+          {{ category.name }}
+
+          <!-- Alt Kategoriler -->
+          <div
+            v-if="hoveredCategory && hoveredCategory.id === category.id"
+            class="subcategory-menu"
+          >
+            <div class="subcategory-list">
+              <div
+                v-for="subCategory in category.subCategories"
+                :key="subCategory.name"
+                class="subcategory-column"
+              >
+                <strong>{{ subCategory.name }}</strong>
+                <ul>
+                  <li v-for="item in subCategory.subItems" :key="item">{{ item }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
   </nav>
 
   <!-- AramaComponenti ekleniyor -->
@@ -114,7 +150,7 @@
       <button
         v-for="category in categories"
         :key="category.id"
-        class="category-button"
+        class="category--button"
         @click="handleClick(category.id)"
       >
         <img :src="category.image" :alt="category.name" />
@@ -127,7 +163,7 @@
   <div class="buttons">
     <button class="button green">Sepete en çok eklenenler</button>
     <button class="button orange">En çok öne çıkanlar</button>
-    <button class="button red">Flaş Ürünler</button>
+    <button class="button red">Flaş Ürünler </button>
   </div>
 
 
@@ -251,9 +287,9 @@ const categories = [
   { id: 2, name: 'Sen De Al!', image: '/icon2.jpg' },
   { id: 3, name: 'Avantajlı Ürünler', image: '/icon3.jpg' },
   { id: 4, name: 'İndirim Kuponlarım', image: '/icon4.jpg' },
-  { id: 5, name: 'Krediler', image: '/icon5.jpg' },
-  { id: 6, name: 'Kredi Kartı', image: '/icon6.jpg' },
-  { id: 7, name: 'Yeni Gelen Ürünler', image: '/icon7.jpg' },
+  { id: 5, name: 'Krediler', image: '/icon1.jpg' },
+  { id: 6, name: 'Kredi Kartı', image: '/icon2.jpg' },
+  { id: 7, name: 'Yeni Gelen Ürünler', image: '/icon3.jpg' },
 ];
 
 const handleClick = (categoryId) => {
@@ -342,6 +378,74 @@ const handleBlur = () => {
 
 const handleSearchClick = () => {
   console.log(`Arama yapıldı: ${searchQuery.value}`);
+};
+
+
+
+// Kategoriler ve alt kategoriler
+const allCategories = ref([
+{
+    id: 1,
+    name: 'Kadın    >',
+    subCategories: [
+      { name: 'Giyim', subItems: ['Elbise', 'Tişört', 'Gömlek', 'Kot Pantolon'] },
+      { name: 'Ayakkabı', subItems: ['Topuklu Ayakkabı', 'Sneaker', 'Bot'] },
+      { name: 'Çanta', subItems: ['Omuz Çantası', 'Sırt Çantası', 'Bel Çantası'] },
+      { name: 'İç Giyim', subItems: ['Pijama Takımı', 'Gecelik', 'Sütyen'] },
+      { name: 'Kozmetik', subItems: ['Parfüm', 'Göz Makyajı', 'Cilt Bakımı'] },
+      { name: 'Giyim', subItems: ['Elbise', 'Tişört', 'Gömlek', 'Kot Pantolon'] },
+      { name: 'Ayakkabı', subItems: ['Topuklu Ayakkabı', 'Sneaker', 'Bot'] },
+      { name: 'Çanta', subItems: ['Omuz Çantası', 'Sırt Çantası', 'Bel Çantası'] },
+      
+    ],
+  },
+  {
+    id: 2,
+    name: 'Erkek     >',
+    subCategories: [
+      { name: 'Giyim', subItems: ['Tişört', 'Pantolon', 'Mont'] },
+      { name: 'Ayakkabı', subItems: ['Sneaker', 'Bot', 'Loafer'] },
+      { name: 'Çanta', subItems: ['Sırt Çantası', 'Laptop Çantası'] },
+    ],
+  },
+  {
+    id: 3,
+    name: 'Anne & Çocuk >',
+    subCategories: ['Bebek Giyim', 'Bebek Ayakkabı', 'Oyuncak'],
+  },
+  {
+    id: 4,
+    name: 'Ev & Mobilya>',
+    subCategories: ['Mobilya', 'Dekorasyon', 'Ev Tekstili', 'Mutfak Ürünleri'],
+  },
+  {
+    id: 5,
+    name: 'Süpermarket>',
+    subCategories: ['Atıştırmalık', 'Temizlik', 'Kişisel Bakım'],
+  },
+  {
+    id: 6,
+    name: 'Elektronik>',
+    subCategories: ['Telefon', 'Bilgisayar', 'Televizyon', 'Beyaz Eşya'],
+  },
+]);
+
+// Tüm Kategoriler açılır menüsü kontrolü
+const showCategoriesMenu = ref(false);
+
+// Üstüne gelinen ana kategori
+const hoveredCategory = ref(null);
+
+const toggleCategoriesMenu = () => {
+  showCategoriesMenu.value = !showCategoriesMenu.value;
+};
+
+const onCategoryHover = (category) => {
+  hoveredCategory.value = category;
+};
+
+const onCategoryLeave = () => {
+  hoveredCategory.value = null;
 };
 </script>
 
@@ -440,6 +544,8 @@ const handleSearchClick = () => {
   color: #0056b3;
 }
 
+
+
 .header {
   display: flex;
   justify-content: space-between;
@@ -502,6 +608,7 @@ const handleSearchClick = () => {
   color: #f90;
 }
 
+
 .categories {
   display: flex;
   gap: 15px;
@@ -509,6 +616,24 @@ const handleSearchClick = () => {
   background-color: #f9f9f9;
   overflow-x: auto;
 }
+.category-button {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #787676;
+  padding: 0px 16px;
+  background-color: #fff;
+  border: 0px solid #ddd;
+  border-radius: 40px;
+  cursor: pointer;
+
+ 
+}
+
+
+
+
 
 .category-all {
   display: flex;
@@ -521,9 +646,84 @@ const handleSearchClick = () => {
   color: #555;
 }
 
-.category-text {
+.main-menu {
+  position: absolute;
+  top: 110px;
+  left: 40px;
+  background-color: #fff;
+  box-shadow: 0 4px 6px rgba(169, 47, 47, 0.1);
+  border: 1px solid #eeebeb;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.main-category-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.main-category-list li {
+  padding: 20px 0;
+  cursor: pointer;
+}
+
+
+.main-category-list li:hover {
+  color: #fcbb0a; /* Hover rengi */
+}
+.main-category-item {
+  position: relative;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+
+
+.subcategory-menu {
+  position: absolute;
+  top: -15px;
+  left: 122px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  gap: 20px;
+}
+.subcategory-menu li:hover {
+  color: #0f0e0f; /* Hover rengi */
+}
+
+.subcategory-list {
+  display: flex;
+  flex-direction: row;
+}
+
+.subcategory-column {
+  min-width: 150px;
+}
+
+.subcategory-column strong {
+  display: block;
+  margin-bottom: 10px;
   font-weight: bold;
 }
+
+.subcategory-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.subcategory-column ul li {
+  margin: 5px 0;
+}
+
+
+
+
+
 
 .category-link {
   text-decoration: none;
@@ -555,26 +755,22 @@ const handleSearchClick = () => {
   margin-bottom: 50px;
 }
 
-.category-button {
+.category--button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   background-color: #f9f9f9;
-  border: 2px solid #ddd;
+  border: 0px solid #ddd;
   border-radius: 20px;
-  padding: 20px;
+  padding: 5px;
   width: 120px;
   text-align: center;
   cursor: pointer;
   transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
 }
 
-.category-button:hover {
-  background-color: #ffe4e1;
-  border-color: #ff7f7f;
-  transform: scale(1.05);
-}
+
 
 .category-button img {
   width: 50px;
@@ -590,6 +786,7 @@ const handleSearchClick = () => {
 
 .buttons {
   display: flex;
+  text-align: center;
   justify-content: space-around;
   width: 100%;
   max-width: 1600px;
@@ -598,6 +795,7 @@ const handleSearchClick = () => {
 .button {
   padding: 20px 150px;
   border: none;
+  text-align: center;
   border-radius: 10px;
   font-size: 20px;
   cursor: pointer;
@@ -617,7 +815,7 @@ const handleSearchClick = () => {
 .button.red {
   background-color: #ffccd5;
   color: #a10029;
-  margin-left: 50px;
+
 }
 
 
